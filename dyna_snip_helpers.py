@@ -1,11 +1,13 @@
+import os
+import sys
+
 import requests
 import json
 import base64
 
 import urllib2
 import lxml
-from lxml import etree
-from lxml.html import parse, submit_form
+from lxml import html
 
 GITHUB_CODE_SEARCH_URL_PAT = "https://github.com/search?l=%s&q=%s&ref=searchresults&type=Code"
 GITHUB_CODE_SEARCH_COUNT_XPATH_PAT = "//*[@id='code_search_results']/div[1]"
@@ -35,7 +37,7 @@ def get_snippet_list(query, lang):
         # Now use the github code search api in this repo to obtain the file
         hint_content = requests.get('https://api.github.com/repos/%s/%s/contents/%s' % (uname, repo, file_path))
         sug = json.loads(hint_content.text)
-        print base64.decodestring(sug['content'])
+        return base64.decodestring(sug['content'])
 
 
 def main():
