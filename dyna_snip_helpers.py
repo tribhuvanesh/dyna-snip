@@ -17,12 +17,11 @@ GITHUB_CODE_SEARCH_COUNT_XPATH_PAT = "//*[@id='code_search_results']/div[1]"
 GITHUB_CODE_SEARCH_RES_XPATH_PAT = "//*[@id='code_search_results']/div[1]/div[%d]/p/a[1]"
 GITHUB_CODE_SEARCH_PATH_XPATH_PAT = "//*[@id='code_search_results']/div[1]/div[%d]/p/a[2]"
 
-
 def get_snippet_list(query, lang):
     all_res = []
     #### MONGO
     # Set up client
-    client = MongoClient()
+    client = MongoClient('158.130.164.180')
     db = client.dyna_database
     clc = db.snippets_collection
 
@@ -63,7 +62,6 @@ def get_snippet_list(query, lang):
 
         all_res += [{"score": 1, "source": "github", "snippet": base64.decodestring(sug['content'])},]
 
-    print all_res
     return all_res
 
 
