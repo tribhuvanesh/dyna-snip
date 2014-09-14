@@ -35,7 +35,10 @@ def get_snippet_list(query, lang):
                 db_res[doc["_id"]] = {"payload": doc, "score": 1}
 
     for id in db_res.keys():
-        all_res += [{"score" : db_res[id]["score"], "source": "mongo", "snippet": db_res[id]["payload"]["snippet"], "title": db_res[id]["payload"]["title"]},]
+        all_res += [{"score" : db_res[id]["score"],
+                     "source": "mongo",
+                     "snippet": db_res[id]["payload"]["snippet"],
+                     "title": db_res[id]["payload"]["title"]}]
 
     #### GITHUB
     # Scrape Github's code search page for this query
