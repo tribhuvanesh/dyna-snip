@@ -12,16 +12,20 @@ from lxml import html
 import pymongo
 from pymongo import MongoClient
 
+from bson.objectid import ObjectId
+
 GITHUB_CODE_SEARCH_URL_PAT = "https://github.com/search?l=%s&q=%s&ref=searchresults&type=Code"
 GITHUB_CODE_SEARCH_COUNT_XPATH_PAT = "//*[@id='code_search_results']/div[1]"
 GITHUB_CODE_SEARCH_RES_XPATH_PAT = "//*[@id='code_search_results']/div[1]/div[%d]/p/a[1]"
 GITHUB_CODE_SEARCH_PATH_XPATH_PAT = "//*[@id='code_search_results']/div[1]/div[%d]/p/a[2]"
 
+MONGO_SERVER_IP = '158.130.164.180'
+
 def get_snippet_list(query, lang):
     all_res = []
     #### MONGO
     # Set up client
-    client = MongoClient('158.130.164.180')
+    client = MongoClient(MONGO_SERVER_IP)
     db = client.dyna_database
     clc = db.snippets_collection
 
@@ -36,9 +40,10 @@ def get_snippet_list(query, lang):
 
     for id in db_res.keys():
         all_res += [{"score" : db_res[id]["score"],
-                     "source": "mongo",
+                     "source": "snipbase",
                      "snippet": db_res[id]["payload"]["snippet"],
-                     "title": db_res[id]["payload"]["title"]}]
+                     "title": db_res[id]["payload"]["title"],
+                     "_id": id}]
 
     #### GITHUB
     # Scrape Github's code search page for this query
@@ -68,8 +73,18 @@ def get_snippet_list(query, lang):
     return all_res
 
 
+def inc_snippet_object(obj):
+    client = MongoClient(MONGO_SERVER_IP)
+    db = client.dyna_database
+    clc = db.snippets_collection
+
+    clc.update({"_id": obj}, {"$inc": {"n": 1}}, upsert=False, multi=False)
+
+
 def main():
-    get_snippet_list("show opening movies in rotten tomatoes", "python")
+    # get_snippet_list("show opening movies in rotten tomatoes", "python")
+    get_snippet_list("create aws s3 bucket", "java")
+    inc_snippet_object(ObjectId("541518b4cb56290c5b457f99"))
 
 
 if __name__ == '__main__':
