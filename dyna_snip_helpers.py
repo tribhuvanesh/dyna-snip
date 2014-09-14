@@ -21,7 +21,7 @@ def get_snippet_list(query, lang):
     all_res = []
     #### MONGO
     # Set up client
-    client = MongoClient('158.130.164.180')
+    client = MongoClient()
     db = client.dyna_database
     clc = db.snippets_collection
 
@@ -36,7 +36,7 @@ def get_snippet_list(query, lang):
 
     for id in db_res.keys():
         all_res += [{"score" : db_res[id]["score"],
-                     "source": "mongo",
+                     "source": "Snipbase",
                      "snippet": db_res[id]["payload"]["snippet"],
                      "title": db_res[id]["payload"]["title"]}]
 
@@ -63,7 +63,7 @@ def get_snippet_list(query, lang):
         hint_content = requests.get('https://api.github.com/repos/%s/%s/contents/%s' % (uname, repo, file_path))
         sug = json.loads(hint_content.text)
 
-        all_res += [{"score": 1, "source": "github", "snippet": base64.decodestring(sug['content']), "title": "%s/%s" % (uname, repo)},]
+        all_res += [{"score": 1, "source": "Github", "snippet": base64.decodestring(sug['content']), "title": "%s/%s" % (uname, repo)},]
 
     return all_res
 

@@ -30,22 +30,22 @@ class PrefixrCommand(sublime_plugin.TextCommand):
             lang = 'python'
 
         query = query_line_contents.replace(comment_marker, '').strip()
-        self.snippet_list = get_snippet_list(query, lang)
+        snippet_list = get_snippet_list(query, lang)
 
         """
         self.snippet_list = [{'source': 'source1', 'snippet': 'def snippet1:\n\tprint "snippet1"', 'score': 10},
                              {'source': 'source2', 'snippet': 'def snippet2:\n\tprint "snippet2"', 'score': 9},
                              {'source': 'source3', 'snippet': 'def snippet3:\n\tprint "snippet3"', 'score': 8}]
                              """
-        self.snippet_list = [item['title'] for item
-                             in sorted(self.snippet_list, key=lambda x: x['score'], reverse=True)]
+        self.snippet_titles = [item['title'] + ' (' + item['source'] + ') ' for item
+                               in sorted(snippet_list, key=lambda x: x['score'], reverse=True)]
+        self.snippets = [item['snippet'] for item
+                         in sorted(snippet_list, key=lambda x: x['score'], reverse=True)]
 
-        self.view.window().run_command("show_overlay", {"overlay": "goto", "text": "@replace_with_first_selection"})
-
-        self.view.window().show_quick_panel(self.snippet_list,\
+        self.view.window().show_quick_panel(self.snippet_titles,\
                                             self.insert_snippet,\
                                             sublime.MONOSPACE_FONT)
         return
 
     def insert_snippet(self, choice):
-        self.view.insert(self.edit, self.pos, '\n' + self.snippet_list[choice][1])
+        self.view.insert(self.edit, self.pos, '\n' + self.snippets[choice])
