@@ -36,7 +36,7 @@ def get_snippet_list(query, lang):
                 db_res[doc["_id"]] = {"payload": doc, "score": 1}
 
     for id in db_res.keys():
-        all_res += [{"score" : db_res[id]["score"], "source": "mongo", "snippet": db_res[id]["payload"]["snippet"]},]
+        all_res += [{"score" : db_res[id]["score"], "source": "mongo", "snippet": db_res[id]["payload"]["snippet"], "title": db_res[id]["payload"]["title"]},]
 
     #### GITHUB
     # Scrape Github's code search page for this query
@@ -61,7 +61,7 @@ def get_snippet_list(query, lang):
         hint_content = requests.get('https://api.github.com/repos/%s/%s/contents/%s' % (uname, repo, file_path))
         sug = json.loads(hint_content.text)
 
-        all_res += [{"score": 1, "source": "github", "snippet": base64.decodestring(sug['content'])},]
+        all_res += [{"score": 1, "source": "github", "snippet": base64.decodestring(sug['content']), "title": "%s/%s" % (uname, repo)},]
 
     print all_res
     return all_res
