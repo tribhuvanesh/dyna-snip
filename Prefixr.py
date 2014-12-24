@@ -5,7 +5,7 @@ import urllib2
 import threading
 import re
 
-from dyna_snip_helpers import get_snippet_list
+from dyna_snip_helpers import get_snippet_list, inc_snippet_object
 
 COMMENT_MARKER_JAVA = '//'
 COMMENT_MARKER_PYTHON = "#"
@@ -30,7 +30,9 @@ class PrefixrCommand(sublime_plugin.TextCommand):
             lang = 'python'
 
         query = query_line_contents.replace(comment_marker, '').strip()
-        snippet_list = get_snippet_list(query, lang)
+        self.snippet_list = get_snippet_list(query, lang)
+
+        self.snippet_list = sorted(self.snippet_list, key=lambda x: x['score'], reverse=True)
 
         """
         self.snippet_list = [{'source': 'source1', 'snippet': 'def snippet1:\n\tprint "snippet1"', 'score': 10},
@@ -38,9 +40,9 @@ class PrefixrCommand(sublime_plugin.TextCommand):
                              {'source': 'source3', 'snippet': 'def snippet3:\n\tprint "snippet3"', 'score': 8}]
                              """
         self.snippet_titles = [item['title'] + ' (' + item['source'] + ') ' for item
-                               in sorted(snippet_list, key=lambda x: x['score'], reverse=True)]
+                               in sorted(self.snippet_list, key=lambda x: x['score'], reverse=True)]
         self.snippets = [item['snippet'] for item
-                         in sorted(snippet_list, key=lambda x: x['score'], reverse=True)]
+                         in sorted(self.snippet_list, key=lambda x: x['score'], reverse=True)]
 
         self.view.window().show_quick_panel(self.snippet_titles,\
                                             self.insert_snippet,\
@@ -48,4 +50,6 @@ class PrefixrCommand(sublime_plugin.TextCommand):
         return
 
     def insert_snippet(self, choice):
+        if '_id' in self.snippet_list[choice]:
+            inc_snippet_object(self.snippet_list[choice]['_id'])
         self.view.insert(self.edit, self.pos, '\n' + self.snippets[choice])
